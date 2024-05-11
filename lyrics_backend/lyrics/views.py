@@ -44,107 +44,107 @@ def get_lyrics(request):
 import cv2
 import numpy as np
 import time
-from keras.models import model_from_json
+# from keras.models import model_from_json
 from collections import Counter
 from django.http import StreamingHttpResponse
 import threading
 
-emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
+# emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
-def load_emotion_model():
-    """Loads the pre-trained emotion detection model."""
-    with open('emotion_model.json', 'r') as json_file:
-        loaded_model_json = json_file.read()
-    emotion_model = model_from_json(loaded_model_json)
-    emotion_model.load_weights("emotion_model.h5")
-    print("Loaded emotion model from disk")
-    return emotion_model
+# def load_emotion_model():
+#     """Loads the pre-trained emotion detection model."""
+#     with open('emotion_model.json', 'r') as json_file:
+#         loaded_model_json = json_file.read()
+#     emotion_model = model_from_json(loaded_model_json)
+#     emotion_model.load_weights("emotion_model.h5")
+#     print("Loaded emotion model from disk")
+#     return emotion_model
 
-emotion_model = load_emotion_model()
+# emotion_model = load_emotion_model()
 
-emotion_counter = []
+# emotion_counter = []
 
-class VideoCamera(object):
-    def __init__(self):
-        self.video = cv2.VideoCapture(0)
-        self.grabbed, self.frame = self.video.read()
-        self.emotion_counter = []
-        self.thread = threading.Thread(target=self.update, args=())
-        self.thread.start()  # Start emotion detection thread in the background
+# class VideoCamera(object):
+#     def __init__(self):
+#         self.video = cv2.VideoCapture(0)
+#         self.grabbed, self.frame = self.video.read()
+#         self.emotion_counter = []
+#         self.thread = threading.Thread(target=self.update, args=())
+#         self.thread.start()  # Start emotion detection thread in the background
 
-    def __del__(self):
-        self.video.release()
+#     def __del__(self):
+#         self.video.release()
 
-    def get_frame(self):
-        image = self.frame
-        _, jpeg = cv2.imencode('.jpg', image)
-        return jpeg.tobytes()
+#     def get_frame(self):
+#         image = self.frame
+#         _, jpeg = cv2.imencode('.jpg', image)
+#         return jpeg.tobytes()
 
-    def update(self):
-        while True:
-            ret, self.frame = self.video.read()
-            if not ret:
-                break
+#     def update(self):
+#         while True:
+#             ret, self.frame = self.video.read()
+#             if not ret:
+#                 break
 
-            frame = cv2.resize(self.frame, (1280, 720))  # Resize for better performance (optional)
-            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#             frame = cv2.resize(self.frame, (1280, 720))  # Resize for better performance (optional)
+#             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(
-                gray_frame, scaleFactor=1.3, minNeighbors=5)
+#             faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(
+#                 gray_frame, scaleFactor=1.3, minNeighbors=5)
 
-            for (x, y, w, h) in faces:
-                roi_gray = gray_frame[y:y + h, x:x + w]
-                cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
+#             for (x, y, w, h) in faces:
+#                 roi_gray = gray_frame[y:y + h, x:x + w]
+#                 cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
 
-                emotion_prediction = emotion_model.predict(cropped_img)
-                emotion_index = np.argmax(emotion_prediction)
-                emotion_label = emotion_dict[emotion_index]
+#                 emotion_prediction = emotion_model.predict(cropped_img)
+#                 emotion_index = np.argmax(emotion_prediction)
+#                 emotion_label = emotion_dict[emotion_index]
 
-                self.emotion_counter.append(emotion_label)
+#                 self.emotion_counter.append(emotion_label)
 
-                cv2.rectangle(frame, (x, y - 50), (x + w, y + h + 10), (0, 255, 0), 2)
-                cv2.putText(frame, emotion_label, (x + 5, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+#                 cv2.rectangle(frame, (x, y - 50), (x + w, y + h + 10), (0, 255, 0), 2)
+#                 cv2.putText(frame, emotion_label, (x + 5, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
-def gen(camera):
-    while True:
-        frame = camera.get_frame()
+# def gen(camera):
+#     while True:
+#         frame = camera.get_frame()
 
-        frame = cv2.resize(frame, (1280, 720))  # Resize for better performance (optional)
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#         frame = cv2.resize(frame, (1280, 720))  # Resize for better performance (optional)
+#         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(
-        gray_frame, scaleFactor=1.3, minNeighbors=5)
+#         faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(
+#         gray_frame, scaleFactor=1.3, minNeighbors=5)
         
-        for (x, y, w, h) in faces:
-            roi_gray = gray_frame[y:y + h, x:x + w]
-            cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
+#         for (x, y, w, h) in faces:
+#             roi_gray = gray_frame[y:y + h, x:x + w]
+#             cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
 
-            emotion_prediction = emotion_model.predict(cropped_img)
-            emotion_index = np.argmax(emotion_prediction)
-            emotion_label = emotion_dict[emotion_index]
+#             emotion_prediction = emotion_model.predict(cropped_img)
+#             emotion_index = np.argmax(emotion_prediction)
+#             emotion_label = emotion_dict[emotion_index]
 
-            emotion_counter.append(emotion_label)
+#             emotion_counter.append(emotion_label)
 
-            cv2.rectangle(frame, (x, y - 50), (x + w, y + h + 10), (0, 255, 0), 2)
-            cv2.putText(frame, emotion_label, (x + 5, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+#             cv2.rectangle(frame, (x, y - 50), (x + w, y + h + 10), (0, 255, 0), 2)
+#             cv2.putText(frame, emotion_label, (x + 5, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
-            cv2.imshow('Emotion Detection', frame)
+#             cv2.imshow('Emotion Detection', frame)
 
 
-        yield (b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+#         yield (b'--frame\r\n'
+#             b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-@gzip.gzip_page  # Assuming @gzip.gzip_page is a decorator for compression (verify)
-def get_video_feed(request):
-    try:
-        cam = VideoCamera()
-        return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
-    except:
-        pass
-    return render(request, 'error.html')  # Redirect to error page on exceptions
+# @gzip.gzip_page  # Assuming @gzip.gzip_page is a decorator for compression (verify)
+# def get_video_feed(request):
+#     try:
+#         cam = VideoCamera()
+#         return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
+#     except:
+#         pass
+#     return render(request, 'error.html')  # Redirect to error page on exceptions
 
-# Assuming face_detector is defined elsewhere (e.g., using cv2.CascadeClassifier)
-face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+# # Assuming face_detector is defined elsewhere (e.g., using cv2.CascadeClassifier)
+# face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 
 

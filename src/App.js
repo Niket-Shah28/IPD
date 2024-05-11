@@ -124,7 +124,7 @@ function App() {
       songName: 'Viva La Vida',
       songArtist: 'Coldplay',
       songSrc: './Assets/songs/Viva La Vida - Coldplay.m4a',
-      songAvatar: './Assets/Images/image7.jpg'
+      songAvatar: './Assets/Images/VLV.jpg'
     }
   ]
 
@@ -219,6 +219,7 @@ function App() {
         if (response.status === 200) {
           const newLyrics = response.data.message.body.lyrics.lyrics_body;
           setLyrics2(newLyrics); 
+          console.log(newLyrics);
         } else {
           console.error('Error fetching lyrics:', response.status);
         }
